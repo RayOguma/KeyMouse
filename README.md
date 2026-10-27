@@ -62,16 +62,3 @@ dotnet run -c Release
 ```
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
 ```
-
-### リリース手順（GitHub Actions）
-
-`main` への push / Pull Request のたびに Actions がビルドし、Actions の実行結果ページから zip をダウンロードできます。
-
-新しいバージョンを Releases に公開するには、`v` から始まるタグを push します。
-
-```
-git tag v1.0.1
-git push origin v1.0.1
-```
-
-数分後に [Releases](https://github.com/RayOguma/KeyMouse/releases) に `KeyMouse-win-x64.zip` が自動で追加されます。
