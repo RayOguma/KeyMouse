@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # .NET のインストール不要で動く単体 exe を作る
+      - name: Publish
+        run: >
+          dotnet publish KeyMouse.csproj -c Release -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=none
+          -o publish
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path publish/KeyMouse.exe, README.md -DestinationPath KeyMouse-win-x64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyMouse-win-x64
+          path: KeyMouse-win-x64.zip
+
+      # v から始まるタグを push したときだけ Releases に公開
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: KeyMouse-win-x64.zip
+          generate_release_notes: true
